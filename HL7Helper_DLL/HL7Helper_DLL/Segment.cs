@@ -127,6 +127,7 @@ namespace HL7Helper_DLL
         public void JsonParse(JObject _Obj, string _Name, DateTime _dtNow, XmlNode _XmlSource)
         {
             XmlNodeList xmlNodeList = _XmlSource.SelectNodes("Element[@Code='" + _Name + "' and @PositionItem='']");
+
             foreach (XmlElement xmlElement in xmlNodeList)
             {
                 string objPosition = xmlElement.GetAttribute("Position");
@@ -197,7 +198,7 @@ namespace HL7Helper_DLL
                                         {
                                             switch (objDataTag)
                                             {
-                                                case "BirthDate":
+                                                case "BirthDay":
                                                     objValue = DateTime.Parse(jsonValue.ToString()).ToString("yyyyMMdd");
                                                     break;
                                                 default:
@@ -225,33 +226,37 @@ namespace HL7Helper_DLL
                     int.TryParse(objPosition, out position);
                     if (position == 2 && _Name.Equals("MSH"))
                     {
-                        switch (objOPT)
-                        {
-                            case "R":
-                                if (string.IsNullOrEmpty(objValue) && objType.Equals("TS"))
-                                {
-                                    objValue = _dtNow.ToString("yyyyMMddHHmmss");
-                                }
-                                break;
-
-                            default:
-                                break;
-                        }
+                        objValue = @"^~\&";
                     }
 
-                    if (!string.IsNullOrEmpty(objValue) && !string.IsNullOrEmpty(objMaxLen))
+                    switch (objOPT)
                     {
-                        int maxLen = 0;
-                        int.TryParse(objMaxLen, out maxLen);
-                        if (objValue.Length > maxLen)
-                        {
-                            objValue = objValue.Substring(0, maxLen);
-                        }
+                        case "R":
+                            if (string.IsNullOrEmpty(objValue) && objType.Equals("TS"))
+                            {
+                                objValue = _dtNow.ToString("yyyyMMddHHmmss");
+                            }
+                            break;
+                        default:
+                            break;
                     }
-                    if (!string.IsNullOrEmpty(objValue) && !string.IsNullOrEmpty(objValue.Replace("^", "")))
+                }
+
+                if (!string.IsNullOrEmpty(objValue) && !string.IsNullOrEmpty(objMaxLen))
+                {
+                    int maxLen = 0;
+                    int.TryParse(objMaxLen, out maxLen);
+                    if (objValue.Length > maxLen)
                     {
-                        Field(position, objValue);
+                        objValue = objValue.Substring(0, maxLen);
                     }
+                }
+
+                if (!string.IsNullOrEmpty(objValue) && !string.IsNullOrEmpty(objValue.Replace("^", "")))
+                {
+                    int position = 0;
+                    int.TryParse(objPosition, out position);
+                    Field(position, objValue);
                 }
             }
 

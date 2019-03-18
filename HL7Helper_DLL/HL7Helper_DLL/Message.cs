@@ -10,7 +10,7 @@ using System.Xml;
 
 namespace HL7Helper_DLL
 {
-    class Message
+    public class Message
     {
         private const string MSH = "MSH";
         private const int MSH_MSG_TIME = 7;
